@@ -1,6 +1,6 @@
 # Sekrd MCP Server
 
-MCP (Model Context Protocol) server for [Sekrd](https://sekrd.com) — deep security audit for AI-built apps. Run security scans directly from Cursor, Claude Code, and other AI IDEs.
+MCP server for [Sekrd](https://sekrd.com) — deep security audit for AI-built apps. Run security scans directly from Cursor, Claude Code, and other AI IDEs.
 
 ## Install
 
@@ -8,10 +8,13 @@ MCP (Model Context Protocol) server for [Sekrd](https://sekrd.com) — deep secu
 pip install sekrd-mcp
 ```
 
-Or run directly with `uvx`:
+Or clone and run directly:
 
 ```bash
-uvx sekrd-mcp
+git clone https://github.com/sekrdcom/sekrd-mcp.git
+cd sekrd-mcp
+pip install httpx
+python server.py
 ```
 
 ## Setup
@@ -19,7 +22,13 @@ uvx sekrd-mcp
 ### Claude Code
 
 ```bash
-claude mcp add sekrd -- uvx sekrd-mcp
+claude mcp add sekrd -- python /path/to/sekrd-mcp/server.py
+```
+
+With API key (for paid plans, unlimited scans):
+
+```bash
+claude mcp add sekrd -e SEKRD_API_KEY=your_key_here -- python /path/to/sekrd-mcp/server.py
 ```
 
 ### Claude Desktop
@@ -30,8 +39,11 @@ Add to `claude_desktop_config.json`:
 {
   "mcpServers": {
     "sekrd": {
-      "command": "uvx",
-      "args": ["sekrd-mcp"]
+      "command": "python",
+      "args": ["/path/to/sekrd-mcp/server.py"],
+      "env": {
+        "SEKRD_API_KEY": "your_key_here"
+      }
     }
   }
 }
@@ -45,33 +57,44 @@ Add to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "sekrd": {
-      "command": "uvx",
-      "args": ["sekrd-mcp"]
+      "command": "python",
+      "args": ["/path/to/sekrd-mcp/server.py"],
+      "env": {
+        "SEKRD_API_KEY": "your_key_here"
+      }
     }
   }
 }
 ```
 
+## API Key
+
+- **Without key**: 3 free scans per month (rate limited by IP)
+- **With key**: Unlimited scans on Scan ($49) or Pro ($29/mo) plans
+
+Get your API key at [sekrd.com/dashboard/settings](https://sekrd.com/dashboard/settings).
+
 ## Tools
 
 | Tool | Description |
 |------|-------------|
-| `scan_url(url)` | Run a security scan on a URL. Returns score, verdict (SHIP/BLOCK), and findings. |
+| `scan_url(url)` | Run a security scan on a URL. Returns score, verdict (SHIP/BLOCK), and findings with fix prompts. |
 | `get_scan(scan_id)` | Get results of a previous scan by ID. |
-| `list_findings(scan_id)` | List findings with fix prompts for a scan. |
+| `list_findings(scan_id)` | List only findings that have fix prompts for Cursor, Lovable, Claude Code. |
 
 ## Example
 
 ```
-> scan_url("https://my-app.vercel.app")
+You: Scan https://my-app.vercel.app for security issues
 
-Score: 34/100 — BLOCK
+Sekrd: Score: 34/100 — BLOCK
 3 critical, 5 high, 2 medium findings
 
-> list_findings("scan_abc123")
-
-1. [CRITICAL] Stripe live secret key exposed in client code
+1. [CRITICAL] Stripe live secret key exposed in client bundle
    Fix (Cursor): Move the secret 'sk_live_...' to a .env file...
+
+2. [CRITICAL] Supabase RLS policy USING(true) on users table
+   Fix: Replace with USING(auth.uid() = user_id)...
 ```
 
 ## License

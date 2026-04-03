@@ -8,6 +8,7 @@ Provides 3 tools:
 
 import asyncio
 import json
+import os
 import sys
 
 import httpx
@@ -17,10 +18,19 @@ POLL_INTERVAL = 3
 MAX_POLLS = 40
 
 
+def _headers() -> dict:
+    """Build request headers with optional API key from env."""
+    h = {"Content-Type": "application/json"}
+    key = os.environ.get("SEKRD_API_KEY", "")
+    if key:
+        h["Authorization"] = f"Bearer {key}"
+    return h
+
+
 async def scan_url(url: str) -> dict:
     """Submit a URL for a full security scan and wait for results."""
     async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(f"{API_BASE}/scan/url", json={"url": url})
+        resp = await client.post(f"{API_BASE}/scan/url", json={"url": url}, headers=_headers())
         resp.raise_for_status()
         data = resp.json()
         scan_id = data["scan_id"]
@@ -39,7 +49,7 @@ async def scan_url(url: str) -> dict:
 async def get_scan(scan_id: str) -> dict:
     """Retrieve a scan result by its ID."""
     async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(f"{API_BASE}/scans/{scan_id}")
+        resp = await client.get(f"{API_BASE}/scans/{scan_id}", headers=_headers())
         resp.raise_for_status()
         return resp.json()
 
@@ -47,7 +57,7 @@ async def get_scan(scan_id: str) -> dict:
 async def list_findings(scan_id: str) -> list:
     """List findings with fix prompts for a given scan."""
     async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(f"{API_BASE}/scans/{scan_id}")
+        resp = await client.get(f"{API_BASE}/scans/{scan_id}", headers=_headers())
         resp.raise_for_status()
         scan = resp.json()
     findings = scan.get("findings", [])
