@@ -10,12 +10,11 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
-    "fastmcp>=2.0",
     "httpx>=0.27",
 ]
 
 [project.scripts]
-sekrd-mcp = "server:mcp.run"
+sekrd-mcp = "server:main"
 
 [project.urls]
 Homepage = "https://sekrd.com"
