@@ -1,31 +1,43 @@
 # Sekrd MCP Server
 
-MCP (Model Context Protocol) server for [Sekrd](https://sekrd.com) — deep security audit for AI-built apps. Use security scanning directly from Cursor, Claude Code, and other AI IDEs.
+MCP (Model Context Protocol) server for [Sekrd](https://sekrd.com) — deep security audit for AI-built apps. Run security scans directly from Cursor, Claude Code, and other AI IDEs.
 
-## Installation
+## Install
 
 ```bash
-pip install -r requirements.txt
+pip install sekrd-mcp
 ```
 
-## Usage
+Or run directly with `uvx`:
 
-### With Claude Code
+```bash
+uvx sekrd-mcp
+```
 
-Add to your Claude Code settings:
+## Setup
+
+### Claude Code
+
+```bash
+claude mcp add sekrd -- uvx sekrd-mcp
+```
+
+### Claude Desktop
+
+Add to `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "sekrd": {
-      "command": "python",
-      "args": ["/path/to/server.py"]
+      "command": "uvx",
+      "args": ["sekrd-mcp"]
     }
   }
 }
 ```
 
-### With Cursor
+### Cursor
 
 Add to `.cursor/mcp.json`:
 
@@ -33,8 +45,8 @@ Add to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "sekrd": {
-      "command": "python",
-      "args": ["/path/to/server.py"]
+      "command": "uvx",
+      "args": ["sekrd-mcp"]
     }
   }
 }
@@ -44,7 +56,7 @@ Add to `.cursor/mcp.json`:
 
 | Tool | Description |
 |------|-------------|
-| `scan_url(url)` | Run a security scan on a URL. Returns score, grade, and findings. |
+| `scan_url(url)` | Run a security scan on a URL. Returns score, verdict (SHIP/BLOCK), and findings. |
 | `get_scan(scan_id)` | Get results of a previous scan by ID. |
 | `list_findings(scan_id)` | List findings with fix prompts for a scan. |
 
@@ -53,7 +65,7 @@ Add to `.cursor/mcp.json`:
 ```
 > scan_url("https://my-app.vercel.app")
 
-Score: 34/100 (Grade F)
+Score: 34/100 — BLOCK
 3 critical, 5 high, 2 medium findings
 
 > list_findings("scan_abc123")
