@@ -70,7 +70,7 @@ Add to `.cursor/mcp.json`:
 ## API Key
 
 - **Without key**: 10 free scans per month (rate limited by IP)
-- **With key**: Unlimited scans on Scan ($9 one-time) or Pro ($29/mo) plans
+- **With key**: Unlimited scans on Pre-Launch Audit ($39 one-time) or Continuous Pro ($24-$29/mo) plans
 
 Get your API key at [sekrd.com/dashboard/settings](https://sekrd.com/dashboard/settings).
 
